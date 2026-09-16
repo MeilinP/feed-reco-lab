@@ -1,16 +1,12 @@
 """Contextual multi-armed bandit + off-policy evaluation.
 
-This is the JD's "reinforcement learning / multi-armed bandit / balancing
-exploration and exploitation" line — the one thing your portfolio was fully
-missing.
-
 Framing: at each step a user arrives with K candidate items (arms). A policy picks
 ONE to show and observes reward = click (1 if the user would rate it >=4). The
 policy sees only the reward of the arm it showed (bandit feedback), so it must
 explore to learn.
 
 Grounded, not arbitrary: the "would click" probabilities come from a logistic
-CTR model fit on YOUR real relevance labels (rating>=4) over the 28 Yelp
+CTR model fit on the real relevance labels (rating>=4) over the 28 Yelp
 features. So theta* is estimated from data; the bandits try to recover it online.
 
 Policies:

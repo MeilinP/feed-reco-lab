@@ -4,7 +4,7 @@ Run:
     python data/make_synthetic_yelp.py --data_dir data/synthetic   # or point at real Yelp
     python run_pipeline.py --data_dir data/synthetic
 
-Prints a report you can paste into the README. Every number is computed here, not
+Prints a report formatted for pasting into the README. Every number is computed here, not
 hard-coded — re-run with a different --seed to see it move.
 """
 from __future__ import annotations

@@ -1,4 +1,4 @@
-"""Generate a small dataset in the EXACT Yelp schema your DSCI 553 project reads.
+"""Generate a small dataset in the EXACT Yelp schema the DSCI 553 project reads.
 
 Why synthetic: the real Yelp dump is multi-GB and can't live in this repo. This
 generator emits the same files (yelp_train.csv, yelp_val.csv, business.json,

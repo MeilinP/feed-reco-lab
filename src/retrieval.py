@@ -3,7 +3,7 @@
 Two retrievers:
   * PopularityRetriever  — the honest baseline. Recommends the globally most
     interacted-with businesses. Any real system must beat this.
-  * ItemCFRetriever      — item-based collaborative filtering (same idea as your
+  * ItemCFRetriever      — item-based collaborative filtering (same idea as the
     DSCI 553 CF term): items are similar if the same users engaged with both;
     a user's candidates are items similar to their history. Binary implicit
     signal (engaged = rated), cosine item-item similarity.

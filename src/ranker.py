@@ -1,14 +1,15 @@
 """Stage 2 — Learning to Rank (LambdaMART via XGBoost XGBRanker).
 
-This is the JD's "Learning to Rank (LTR)" line. The retriever hands us a short
-candidate list per user; the ranker orders it to maximise NDCG.
+The retriever hands the ranker a short candidate list per user; the ranker
+orders it to maximise NDCG.
 
 Training data is grouped BY USER (that is what makes it *ranking*, not regression):
   * a user's engaged items get graded relevance  (rating>=4 -> 2, rating==3 -> 1, else 0)
   * plus sampled un-engaged items as hard negatives (relevance 0)
 XGBoost's `rank:ndcg` objective (LambdaMART) optimises pairwise order within each
-group, weighted by how much a swap would move NDCG. Features are your 28 Yelp
-features — the ranker learns which of them separate liked from disliked items.
+group, weighted by how much a swap would move NDCG. Features are the same 28
+Yelp features from features.py — the ranker learns which of them separate liked
+from disliked items.
 """
 from __future__ import annotations
 import numpy as np

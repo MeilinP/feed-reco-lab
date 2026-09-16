@@ -1,15 +1,14 @@
-"""A/B testing & experimentation harness — the JD's "design and conduct A/B tests
-... rigorous statistical analysis" line, and the piece your stats background makes
-most defensible.
+"""A/B testing & experimentation harness for evaluating ranking/bandit policies
+against each other with proper statistical rigor.
 
 Four things a real experimentation stack needs:
-  1. sample_size_for_proportion — how many users before you start (power analysis)
+  1. sample_size_for_proportion — how many users are needed before starting (power analysis)
   2. welch_ttest               — is the lift real? (unequal-variance t-test + CI)
   3. cuped                     — variance reduction using a pre-experiment covariate
                                  (CUPED, Deng et al. 2013): same power, fewer users
   4. always_valid_pvalue       — peek any time without inflating false positives (mSPRT)
 
-Everything is plain formulas you can reproduce in a notebook — no black box.
+Everything is plain formulas, reproducible by hand in a notebook — no black box.
 """
 from __future__ import annotations
 import numpy as np
@@ -61,8 +60,8 @@ def cuped(y_control, y_treatment, x_control, x_treatment) -> dict:
 def always_valid_pvalue(control, treatment, tau2=1.0) -> float:
     """mSPRT always-valid p-value (Gaussian mixture) — safe under continuous peeking.
 
-    Lets you stop the test the moment it crosses your threshold without the
-    fixed-horizon p-value's inflated false-positive rate.
+    Lets the test stop the moment it crosses significance, without the
+    fixed-horizon p-value's inflated false-positive rate under continuous peeking.
     """
     c, t = np.asarray(control, float), np.asarray(treatment, float)
     n = min(c.size, t.size)

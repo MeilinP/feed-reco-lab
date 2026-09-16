@@ -1,9 +1,10 @@
-"""The 28-feature builder — lifted from your DSCI 553 `competition.py` and cleaned.
+"""The 28-feature builder — ported from the DSCI 553 `competition.py` implementation and cleaned up.
 
-Same 13 business + 10 user + 5 interaction features you already defend in that
-project. Reused here so the *ranker* is trained on features you understand, not a
-new black box. The only change: plain-Python/dict loading instead of Spark RDDs,
-so it runs anywhere. The feature semantics are identical.
+Same 13 business + 10 user + 5 interaction features as that project. Reusing
+them here means the ranker trains on features with known, well-understood
+semantics rather than a new black box. The only change: plain-Python/dict
+loading instead of Spark RDDs, so it runs anywhere without a cluster. Feature
+semantics are otherwise identical.
 
 FEATURE_NAMES is the source of truth for column order (feeds NDCG feature-importance).
 """

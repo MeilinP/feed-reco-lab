@@ -2,8 +2,8 @@
 
 Every metric here takes a list of relevance labels *ordered by the model's
 predicted score* (index 0 = the item the model ranked first) and returns a
-scalar. Keep these tiny and readable: if you can't reproduce NDCG@k by hand on
-a 3-item example, you can't defend the ranker's numbers in an interview.
+scalar. Kept tiny and readable on purpose: an implementation that can't be
+verified by hand on a 3-item example isn't trustworthy at any scale.
 """
 from __future__ import annotations
 import numpy as np

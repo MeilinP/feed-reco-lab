@@ -62,8 +62,7 @@ set. That is a real, stated limitation, not a hidden one.
 
 → **Item-CF retrieval is ~3.8x popularity's NDCG@10 on real Yelp** — the absolute
 numbers are small because real Yelp is huge and sparse (192K businesses, most
-users rate only a handful), which is expected and worth saying out loud in an
-interview, not hidden.
+users rate only a handful), which is expected given how sparse the real dataset is.
 
 > **The LambdaMART line still trails CF here — and now I know exactly why.**
 > With `user.json` missing, `usr_average_stars` is a constant default for every
@@ -92,29 +91,16 @@ ever deploying it: **replay = 0.766, IPS = 0.820** (true online ≈ 0.841).
 - power analysis: N/arm to detect a +0.02 lift at 80% power
 - CUPED: **50% variance reduction** on a pre-period covariate (adjusted p 1.4e-11 vs raw 1.8e-06)
 - always-valid mSPRT p-value reported (deliberately more conservative than the
-  fixed-horizon p — it's what lets you peek continuously without inflating false positives)
+  fixed-horizon p — it allows continuous peeking without inflating false positives)
 
 Re-run with `python run_pipeline.py --data_dir data/real_yelp` (real files are
-gitignored — not checked in — so pull your own copy of `yelp_train.csv`,
-`yelp_val.csv`, `business.json` into that folder first). Takes ~3 minutes on
+gitignored — not checked in — so a local copy of `yelp_train.csv`,
+`yelp_val.csv`, `business.json` needs to be added to that folder first). Takes ~3 minutes on
 455K ratings. A synthetic fallback (`data/synthetic`, generated automatically if
 missing) exists only so the repo runs for someone without the Yelp files —
-report the real-data numbers above, not synthetic ones, anywhere this goes on
-a resume or gets discussed in an interview.
-
----
-
-## How each stage maps to the Robinhood MLE JD
-
-| JD requirement | Where it lives |
-|---|---|
-| Collaborative / content / **hybrid** models | `retrieval.py` (item-CF) + `ranker.py` (content features + CF score) |
-| **Learning to Rank (LTR)** | `ranker.py` — XGBoost `rank:ndcg` LambdaMART, hard-negative mining, NDCG/MAP |
-| **RL / multi-armed bandit, explore/exploit** | `bandit.py` — LinUCB, LinTS, regret |
-| Off-policy / counterfactual evaluation | `bandit.py` — replay (Li et al. 2011) + IPS |
-| **A/B testing & rigorous statistics** | `experiment.py` — Welch t-test, power, CUPED, mSPRT |
-| Classical ML on tabular data (XGBoost) | `ranker.py`, `bandit.py` CTR model |
-| Python / SQL / XGBoost / sklearn | throughout (Spark version of the feature job lives in the DSCI 553 repo) |
+the real-data numbers above are the ones that reflect actual model behavior;
+the synthetic ones reflect a much smaller, generated dataset and are not
+comparable.
 
 ---
 
@@ -134,26 +120,27 @@ in `features.py` is lifted directly from the DSCI 553 `competition.py`, so the
 
 ---
 
-## How I'd defend this in an interview
+## Design Rationale
 
-- **Why two stages?** Retrieval optimizes recall cheaply over the whole catalog;
+- **Two stages, not one.** Retrieval optimizes recall cheaply over the whole catalog;
   ranking optimizes order over ~100 candidates with an expensive model. Separating
-  them is how you serve ranking at scale.
-- **Why item-CF on likes only?** Co-*liking* (rating ≥ 4) reflects taste; co-*engagement*
+  them is what lets ranking run at scale without scoring the whole catalog with
+  the expensive model.
+- **Item-CF on likes only, not all engagement.** Co-*liking* (rating ≥ 4) reflects taste; co-*engagement*
   including dislikes is just exposure. Building CF on likes sharpens the signal.
-- **Why popularity-matched negatives / hard-negative mining?** If training/eval
+- **Popularity-matched negatives / hard-negative mining.** If training/eval
   negatives are easy (random, unpopular), the model wins with popularity-proxy
   features that don't transfer. Matching the negative distribution to serve time
-  is what makes the offline metric trustworthy — and it's how I *found* that raw
-  volume features (check-in/photo/tip counts) leak exposure bias.
-- **Why LinUCB vs ε-greedy?** UCB explores where it's *uncertain* (optimism under
+  is what makes the offline metric trustworthy — and it's how the raw
+  volume features (check-in/photo/tip counts) were found to leak exposure bias.
+- **LinUCB vs ε-greedy.** UCB explores where it's *uncertain* (optimism under
   uncertainty), not uniformly at random — lower regret. LinTS does the same via
   posterior sampling.
-- **Why off-policy evaluation?** You can't A/B every candidate policy in production.
-  Replay/IPS estimate a new policy's value from logs of the current one, unbiased
-  when the logging propensities are known.
-- **Why CUPED and always-valid p-values?** CUPED removes pre-experiment variance so
-  you reach significance with fewer users; mSPRT lets you stop early without the
+- **Off-policy evaluation.** Not every candidate policy can be A/B tested in
+  production. Replay/IPS estimate a new policy's value from logs of the current
+  one, unbiased when the logging propensities are known.
+- **CUPED and always-valid p-values.** CUPED removes pre-experiment variance,
+  reaching significance with fewer users; mSPRT allows stopping early without the
   peeking problem that inflates false positives in fixed-horizon tests.
 
 ---
